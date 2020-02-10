@@ -97,6 +97,7 @@
     "node-forge": "^0.9.1",
     "normalize-path": "^3.0.0",
     "normalize-url": "^4.5.0",
+    "open": "^7.0.2",
     "p-queue": "^6.2.1",
     "p-retry": "^4.2.0",
     "parse-git-config": "^3.0.0",

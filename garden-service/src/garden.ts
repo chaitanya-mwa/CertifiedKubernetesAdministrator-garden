@@ -60,6 +60,7 @@ import { loadPlugins, getDependencyOrder, getModuleTypes } from "./plugins"
 import { deline, naturalList } from "./util/string"
 import dedent from "dedent"
 import { ensureConnected } from "./db/connection"
+import { readAuthToken, login } from "./platform/auth"
 
 export interface ActionHandlerMap<T extends keyof PluginActionHandlers> {
   [actionName: string]: PluginActionHandlers[T]
@@ -261,6 +262,11 @@ export class Garden {
 
     // Connect to the state storage
     await ensureConnected()
+
+    // If a client auth token exists in local storage, we assume that the user wants to be logged in to the platform.
+    if (await readAuthToken(log)) {
+      await login(log)
+    }
 
     const garden = new this({
       artifactsPath,
