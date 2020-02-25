@@ -24,7 +24,12 @@ export const DEFAULT_AUTH_REDIRECT_PORT = 9776
 const backendURL = "http://ths-cloud-api.cloud.dev.garden.io"
 const frontendURL = "http://ths-cloud.cloud.dev.garden.io"
 
-export async function login(log: LogEntry) {
+// TODO: Add error handling and tests for all of this
+
+/**
+ * Logs in to the platform if needed, and returns a valid client auth token.
+ */
+export async function login(log: LogEntry): Promise<string> {
   const savedToken = await readAuthToken(log)
 
   // Ping platform with saved token (if it exists)
@@ -32,7 +37,7 @@ export async function login(log: LogEntry) {
     log.debug("Local client auth token found, verifying it with platform...")
     if (await checkClientAuthToken(savedToken, log)) {
       log.debug("Local client token is valid, no need for login.")
-      return
+      return savedToken
     }
   }
 
@@ -51,8 +56,12 @@ export async function login(log: LogEntry) {
   })
   await server.close()
   await saveAuthToken(newToken, log)
+  return newToken
 }
 
+/**
+ * Checks with the backend whether the provided client auth token is valid.
+ */
 async function checkClientAuthToken(token: string, log: LogEntry): Promise<boolean> {
   const res = await axios.get(`${backendURL}/auth/check-client-token/${token}`)
   log.debug(`Checked client auth token with platform - valid: ${res.data.valid}`)

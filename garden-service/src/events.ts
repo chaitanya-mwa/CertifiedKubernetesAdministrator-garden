@@ -7,9 +7,10 @@
  */
 
 import { EventEmitter2 } from "eventemitter2"
-import { LogEntry } from "./logger/log-entry"
+// import { LogEntry } from "./logger/log-entry"
 import { ModuleVersion } from "./vcs/vcs"
 import { TaskResult } from "./task-graph"
+import { LogEntryEvent } from "./platform/buffered-event-stream"
 
 /**
  * This simple class serves as the central event bus for a Garden instance. Its function
@@ -18,7 +19,8 @@ import { TaskResult } from "./task-graph"
  * See below for the event interfaces.
  */
 export class EventBus extends EventEmitter2 {
-  constructor(private log: LogEntry) {
+  constructor() {
+  // constructor(private log?: LogEntry) {
     super({
       wildcard: false,
       newListener: false,
@@ -26,20 +28,22 @@ export class EventBus extends EventEmitter2 {
     })
   }
 
-  emit<T extends EventName>(name: T, payload: Events[T]) {
-    this.log.silly(`Emit event '${name}'`)
+  emit<T extends GardenEventName>(name: T, payload: GardenEvents[T]) {
+    // if (this.log) {
+    //   this.log.silly(`Emit event '${name}'`)
+    // }
     return super.emit(name, payload)
   }
 
-  on<T extends EventName>(name: T, listener: (payload: Events[T]) => void) {
+  on<T extends GardenEventName>(name: T, listener: (payload: GardenEvents[T]) => void) {
     return super.on(name, listener)
   }
 
-  onAny(listener: <T extends EventName>(name: T, payload: Events[T]) => void) {
+  onAny(listener: <T extends GardenEventName>(name: T, payload: GardenEvents[T]) => void) {
     return super.onAny(<any>listener)
   }
 
-  once<T extends EventName>(name: T, listener: (payload: Events[T]) => void) {
+  once<T extends GardenEventName>(name: T, listener: (payload: GardenEvents[T]) => void) {
     return super.once(name, listener)
   }
 
@@ -47,9 +51,20 @@ export class EventBus extends EventEmitter2 {
 }
 
 /**
- * The supported events and their interfaces.
+ * Supported logger events and their interfaces.
  */
-export type Events = {
+export interface LoggerEvents {
+  logEntryCreated: LogEntryEvent
+  logEntryUpdated: LogEntryEvent
+}
+
+export type LoggerEventName = keyof LoggerEvents
+export const loggerEventNames: GardenEventName[] = ["logEntryCreated", "logEntryUpdated"]
+
+/**
+ * Supported Garden events and their interfaces.
+ */
+export interface GardenEvents extends LoggerEvents {
   // Internal test/control events
   _exit: {}
   _restart: {}
@@ -108,8 +123,7 @@ export type Events = {
   taskGraphComplete: {
     completedAt: Date
   }
-
   watchingForChanges: {}
 }
 
-export type EventName = keyof Events
+export type GardenEventName = keyof GardenEvents

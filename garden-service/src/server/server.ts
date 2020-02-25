@@ -24,7 +24,7 @@ import { DASHBOARD_STATIC_DIR } from "../constants"
 import { LogEntry } from "../logger/log-entry"
 import { CommandResult } from "../commands/base"
 import { toGardenError, GardenError } from "../exceptions"
-import { EventName, Events } from "../events"
+import { GardenEventName, GardenEvents } from "../events"
 import { ValueOf } from "../util/util"
 import { AnalyticsHandler } from "../analytics/analytics"
 import { joi } from "../config/common"
@@ -264,8 +264,8 @@ interface ServerWebsocketMessages {
     message: string
   }
   event: {
-    name: EventName
-    payload: ValueOf<Events>
+    name: GardenEventName
+    payload: ValueOf<GardenEvents>
   }
 }
 

@@ -14,6 +14,7 @@ import { Omit } from "../util/util"
 import { getChildEntries, findParentEntry } from "./util"
 import { GardenError } from "../exceptions"
 import { Logger } from "./logger"
+import { formatForEventStream } from "../platform/buffered-event-stream"
 
 export type EmojiName = keyof typeof nodeEmoji.emoji
 export type LogSymbol = keyof typeof logSymbols | "empty"
@@ -32,6 +33,8 @@ export interface TaskMetadata {
   versionString: string
   durationMs?: number
 }
+
+export const EVENT_LOG_LEVEL = LogLevel.debug
 
 interface MessageBase {
   msg?: string
@@ -89,6 +92,7 @@ export class LogEntry extends LogNode {
   public readonly errorData?: GardenError
   public readonly childEntriesInheritLevel?: boolean
   public readonly id?: string
+  public revision: number
 
   constructor(params: LogEntryConstructor) {
     super(params.level, params.parent, params.id)
@@ -100,6 +104,7 @@ export class LogEntry extends LogNode {
     this.childEntriesInheritLevel = params.childEntriesInheritLevel
     this.metadata = params.metadata
     this.id = params.id
+    this.revision = 0
 
     if (!params.isPlaceholder) {
       this.update({
@@ -112,6 +117,10 @@ export class LogEntry extends LogNode {
         dataFormat: params.dataFormat,
         maxSectionWidth: params.maxSectionWidth,
       })
+
+      if (this.level <= EVENT_LOG_LEVEL) {
+        this.root.events.emit("logEntryCreated", formatForEventStream(this))
+      }
     }
   }
 
@@ -122,6 +131,7 @@ export class LogEntry extends LogNode {
    * 3. next metadata is merged with the previous metadata
    */
   protected update(updateParams: UpdateLogEntryParams): void {
+    this.revision = this.revision + 1
     const messageState = this.getMessageState()
 
     // Explicitly set all the fields so the shape stays consistent
@@ -190,6 +200,9 @@ export class LogEntry extends LogNode {
 
   protected onGraphChange(node: LogEntry) {
     this.root.onGraphChange(node)
+    if (node.level <= EVENT_LOG_LEVEL) {
+      this.root.events.emit("logEntryUpdated", formatForEventStream(node))
+    }
   }
 
   getMetadata() {

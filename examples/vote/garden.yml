@@ -10,7 +10,8 @@ providers:
   - name: kubernetes
     environments: [remote]
     # Replace these values as appropriate
-    context: gke_garden-dev-200012_europe-west1-b_garden-dev-1
+    context: gke_doddi-dev-1_europe-west1-b_doddi-dev-1
+    # context: gke_garden-dev-200012_europe-west1-b_garden-dev-1
     namespace: ${local.env.USER || local.username}-vote
     defaultHostname: ${local.env.USER || local.username}-vote.dev-1.sys.garden
     buildMode: cluster-docker

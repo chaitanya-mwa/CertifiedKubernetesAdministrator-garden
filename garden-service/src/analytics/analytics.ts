@@ -6,8 +6,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import uuidv4 from "uuid/v4"
 import segmentClient = require("analytics-node")
+import uuidv4 from "uuid/v4"
 import { platform, release } from "os"
 import ci = require("ci-info")
 import { flatten } from "lodash"
@@ -16,9 +16,8 @@ import { getPackageVersion } from "../util/util"
 import { SEGMENT_PROD_API_KEY, SEGMENT_DEV_API_KEY } from "../constants"
 import { LogEntry } from "../logger/log-entry"
 import hasha = require("hasha")
-import uuid from "uuid"
 import { Garden } from "../garden"
-import { Events, EventName } from "../events"
+import { GardenEvents, GardenEventName } from "../events"
 import { AnalyticsType } from "./analytics-types"
 import dedent from "dedent"
 
@@ -92,7 +91,11 @@ export interface SegmentEvent {
   properties: AnalyticsEventProperties
 }
 
-type SupportedEvents = Events["taskPending"] | Events["taskProcessing"] | Events["taskComplete"] | Events["taskError"]
+type SupportedEvents =
+  | GardenEvents["taskPending"]
+  | GardenEvents["taskProcessing"]
+  | GardenEvents["taskComplete"]
+  | GardenEvents["taskError"]
 
 /**
  * A Segment client wrapper with utility functionalities global config and info,
@@ -119,7 +122,7 @@ export class AnalyticsHandler {
   private projectName = ""
   private systemConfig: SystemInfo
   private isCI = ci.isCI
-  private sessionId = uuid.v4()
+  private sessionId
   protected garden: Garden
   private projectMetadata: ProjectMetadata
 
@@ -127,6 +130,7 @@ export class AnalyticsHandler {
     this.segment = new segmentClient(API_KEY, { flushAt: 20, flushInterval: 300 })
     this.log = log
     this.garden = garden
+    this.sessionId = garden.sessionId
     this.globalConfigStore = new GlobalConfigStore()
     this.globalConfig = {
       userId: "",
@@ -223,7 +227,7 @@ export class AnalyticsHandler {
   /**
    * Handler used internally to process the TaskGraph events.
    */
-  private async processEvent<T extends EventName>(name: T, payload: Events[T]) {
+  private async processEvent<T extends GardenEventName>(name: T, payload: GardenEvents[T]) {
     if (AnalyticsHandler.isSupportedEvent(name, payload)) {
       await this.trackTask(payload.batchId, payload.name, payload.type, name)
     }
@@ -239,7 +243,7 @@ export class AnalyticsHandler {
   /**
    * Typeguard to check wether we can process or not an event
    */
-  static isSupportedEvent(name: EventName, _event: Events[EventName]): _event is SupportedEvents {
+  static isSupportedEvent(name: GardenEventName, _event: GardenEvents[GardenEventName]): _event is SupportedEvents {
     const supportedEventsKeys = ["taskPending", "taskProcessing", "taskComplete", "taskError"]
     return supportedEventsKeys.includes(name)
   }
