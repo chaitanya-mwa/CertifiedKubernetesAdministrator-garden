@@ -101,7 +101,7 @@ export class BufferedEventStream {
 
     if (eventsToFlush.length > 0) {
       const events = {
-        clientAuthToken: this.clientAuthToken,
+        // clientAuthToken: this.clientAuthToken,
         sessionId: this.sessionId,
         events: eventsToFlush,
       }
@@ -121,7 +121,7 @@ export class BufferedEventStream {
 
     if (logEntriesToFlush.length > 0) {
       const logEntries = {
-        clientAuthToken: this.clientAuthToken,
+        // clientAuthToken: this.clientAuthToken,
         sessionId: this.sessionId,
         logEntries: logEntriesToFlush,
       }
