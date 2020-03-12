@@ -70,6 +70,8 @@ export async function processModules({
   }
 
   if (watch && !!footerLog) {
+    footerLog.info("")
+
     garden.events.on("taskGraphProcessing", () => {
       const emoji = printEmoji("hourglass_flowing_sand", footerLog)
       footerLog.setState(`${emoji} Processing...`)

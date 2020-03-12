@@ -98,7 +98,7 @@ export class Logger extends LogNode {
     return instance
   }
 
-  private constructor(config: LoggerConfig) {
+  constructor(config: LoggerConfig) {
     super(config.level)
     this.writers = config.writers || []
     this.useEmoji = config.useEmoji === false ? false : true
