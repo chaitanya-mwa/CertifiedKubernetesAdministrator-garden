@@ -328,10 +328,7 @@ export class FullscreenTerminalWriter extends Writer {
 
   public onGraphChange(entry: LogEntry, logger: Logger): void {
     if (entry.level === LogLevel.error) {
-      const out = basicRender(entry, logger)
-      if (out) {
-        this.errorMessages.push(out)
-      }
+      this.errorMessages.push(formatForTerminal(entry, "basic"))
     }
 
     if (!this.initialized) {
