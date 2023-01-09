@@ -131,8 +131,8 @@
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
-    "@commitlint/cli": "^8.3.5",
-    "@commitlint/config-conventional": "^8.3.4",
+    "@commitlint/cli": "^17.4.1",
+    "@commitlint/config-conventional": "^17.4.0",
     "@google-cloud/kms": "^1.6.3",
     "@types/analytics-node": "^3.1.2",
     "@types/async-lock": "^1.1.1",
